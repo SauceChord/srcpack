@@ -15,7 +15,10 @@ end
 
 ---@return integer[]
 function LuaScanner:scanTokens()
-    table.insert(self.tokens, LuaToken.new("<eof>", nil, nil, 1))
+    while not self:isAtEnd() do
+        self:scanToken()
+    end
+    table.insert(self.tokens, LuaToken.new("<eof>", nil, nil, self.line))
     return self.tokens
 end
 
@@ -60,12 +63,12 @@ function LuaScanner:scanToken()
         ['^'] = function() return self:addToken("POW") end,
         ['&'] = function() return self:addToken("BAND") end,
         ['|'] = function() return self:addToken("BOR") end,
-        ['/'] = function() return self:addToken(self:matchAny('/') and "DIV_FLOOR" or "DIV") end,
-        ['~'] = function() return self:addToken(self:matchAny('=') and "NOT_EQUAL" or "BNOT") end,
-        ['<'] = function() return self:addToken(self:matchAny('=') and "LESS_EQUAL" or "LESS") end,
-        ['>'] = function() return self:addToken(self:matchAny('=') and "GREATER_EQUAL" or "GREATER") end,
-        ['='] = function() return self:addToken(self:matchAny('=') and "EQUAL_EQUAL" or "EQUAL") end,
-        [':'] = function() return self:addToken(self:matchAny(':') and "COLON_COLON" or "COLON") end,
+        ['/'] = function() return self:addToken(self:matchAny('/') and "IDIV" or "DIV") end,
+        ['~'] = function() return self:addToken(self:matchAny('=') and "NE" or "BNOT") end,
+        ['<'] = function() return self:addToken(self:matchAny('<') and "SHL" or (self:matchAny('=') and "LE" or "L")) end,
+        ['>'] = function() return self:addToken(self:matchAny('>') and "SHR" or (self:matchAny('=') and "GE" or "G")) end,
+        ['='] = function() return self:addToken(self:matchAny('=') and "EQ" or "ASSIGN") end,
+        [':'] = function() return self:addToken(self:matchAny(':') and "DBCOLON" or "COLON") end,
         ['\r'] = function()
             self.line = self.line + 1
             self.start = self.current
@@ -95,16 +98,27 @@ function LuaScanner:scanToken()
         ["'"] = function()
             return self:buildStringToken("'")
         end,
+        ['"'] = function()
+            return self:buildStringToken('"')
+        end,
+        ['['] = function()
+            if self:matchAny('[') then
+                return self:buildStringToken(']]')
+            end
+        end,
     }
     return (switch[c] or error(string.format("unhandled character %s in token stream at line %d", c, self.line)))()
 end
 
-function LuaScanner:buildStringToken(endChar)
+function LuaScanner:buildStringToken(endChars)
+    local line = self.line
+    local reachedEnd = false
     while not self:isAtEnd() do
         if self:peek() == '\\' then
             self:advance()
             self:advance()
-        elseif self:peek() == endChar then
+        elseif self:matchMany(endChars) then
+            reachedEnd = true
             break
         else
             if self:peek() == '\r' or self:peek() == '\n' then
@@ -113,18 +127,29 @@ function LuaScanner:buildStringToken(endChar)
             self:advance()
         end
     end
-    if self:isAtEnd() then
+    if not reachedEnd then
         error(string.format("Unterminated string on line %d", self.line))
     end
-    local value = self.source:sub(self.start + 1, self.current - 1)
-    self:advance()
-    return self:addToken("STRING", value)
+    local value = self.source:sub(self.start + #endChars, self.current - #endChars - 1)
+    local token = self:addToken("STRING", value, line)
+    --self:advance()
+    return token
 end
 
 function LuaScanner:skipWhiteSpace()
     while self:matchAny(" \t\v\f") do
     end
     self.start = self.current
+end
+
+function LuaScanner:peekMany(expected)
+    if self.current + #expected > #self.source then return false end
+    for i = 1, #expected do
+        if self.source:sub(self.current + i, self.current + i) ~= expected:sub(i, i) then
+            return false
+        end
+    end
+    return true
 end
 
 ---@return string char
@@ -141,10 +166,12 @@ end
 
 ---@param type string
 ---@param literal string|nil
+---@param line integer|nil
 ---@return LuaToken token
-function LuaScanner:addToken(type, literal)
+function LuaScanner:addToken(type, literal, line)
+    line = line or self.line
     local text = self.source:sub(self.start, self.current - 1)
-    local token = LuaToken.new(type, text, literal, self.line)
+    local token = LuaToken.new(type, text, literal, line)
     table.insert(self.tokens, token)
     self.start = self.current
     return token
@@ -153,13 +180,13 @@ end
 ---@param expected string
 ---@return boolean match
 function LuaScanner:matchMany(expected)
-    if self.current + #expected > #self.source then return false end
+    if self.current + #expected > #self.source + 1 then return false end
     for i = 1, #expected do
         if self.source:sub(self.current + i - 1, self.current + i - 1) ~= expected:sub(i, i) then
             return false
         end
     end
-    self.current = self.current + #expected + 1
+    self.current = self.current + #expected
     return true
 end
 
