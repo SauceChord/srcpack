@@ -82,33 +82,20 @@ function LuaScanner:scanToken()
             end
             return self:scanToken()
         end,
-        [' '] = function()
-            self:skipWhiteSpace()
-            return self:scanToken()
-        end,
-        ['\t'] = function()
-            self:skipWhiteSpace()
-            return self:scanToken()
-        end,
-        ['\f'] = function()
-            self:skipWhiteSpace()
-            return self:scanToken()
-        end,
-        ['\v'] = function()
-            self:skipWhiteSpace()
-            return self:scanToken()
-        end,
-        ["'"] = function()
-            return self:buildStringToken("'")
-        end,
-        ['"'] = function()
-            return self:buildStringToken('"')
-        end,
+        [' '] = function() self:skipWhiteSpace() return self:scanToken() end,
+        ['\t'] = function() self:skipWhiteSpace() return self:scanToken() end,
+        ['\f'] = function() self:skipWhiteSpace() return self:scanToken() end,
+        ['\v'] = function() self:skipWhiteSpace() return self:scanToken() end,
+        ["'"] = function() return self:buildStringToken("'") end,
+        ['"'] = function() return self:buildStringToken('"') end,
         ['['] = function()
             if self:matchAny('[') then
                 return self:buildStringToken(']]')
+            else
+                return self:addToken("LEFT_BRACKET")
             end
         end,
+        [']'] = function() return self:addToken("RIGHT_BRACKET") end,
     }
     return (switch[c] or error(string.format("unhandled character %s in token stream at line %d", c, self.line)))()
 end
