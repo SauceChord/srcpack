@@ -1,4 +1,4 @@
-local LuaToken = require "src.LuaToken"
+local LuaToken = require "LuaToken"
 
 describe("LuaToken", function()
     describe("new()", function()

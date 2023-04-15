@@ -1,4 +1,4 @@
-local LuaScanner = require "src.LuaScanner"
+local LuaScanner = require "LuaScanner"
 
 describe("LuaScanner", function()
     describe("new(source)", function()
