@@ -108,7 +108,7 @@ function LuaScanner:scanToken()
         ['8'] = function() return self:buildNumeral() end,
         ['9'] = function() return self:buildNumeral() end,
     }
-    return (switch[c] or error(string.format("unhandled character %s in token stream at line %d", c, self.line)))()
+    return (switch[c] or function() return self:addToken("UNKNOWN") end)()
 end
 
 function LuaScanner:buildNumeral()

@@ -36,21 +36,21 @@ describe("LuaScanner", function()
             end)
             it("produces 10 tokens from source", function()
                 local scanner = LuaScanner.new("<><<<\n * \t--comment*\n 'string' [[multi\nline]];")
-                local i = 1
-                local function tk() return tostring(scanner.tokens[i]) end
+                local i = 0
+                local function tk() i = i + 1 return tostring(scanner.tokens[i]) end
                 local function err() return string.format("tokens[%d]", i) end
                 scanner:scanTokens()
                 assert.are.same(10, #scanner.tokens, "#scanner.tokens")
-                assert.are.same("L < nil 1", tk(), err()) i = i + 1
-                assert.are.same("G > nil 1", tk(), err()) i = i + 1
-                assert.are.same("SHL << nil 1", tk(), err()) i = i + 1
-                assert.are.same("L < nil 1", tk(), err()) i = i + 1
-                assert.are.same("MULT * nil 2", tk(), err()) i = i + 1
-                assert.are.same("COMMENT --comment* nil 2", tk(), err()) i = i + 1
-                assert.are.same("STRING 'string' string 3", tk(), err()) i = i + 1
-                assert.are.same("STRING [[multi\nline]] multi\nline 3", tk(), err()) i = i + 1
-                assert.are.same("SEMICOLON ; nil 4", tk(), err()) i = i + 1
-                assert.are.same("<eof> nil nil 4", tk(), err()) i = i + 1
+                assert.are.same("L < nil 1", tk(), err())
+                assert.are.same("G > nil 1", tk(), err())
+                assert.are.same("SHL << nil 1", tk(), err())
+                assert.are.same("L < nil 1", tk(), err())
+                assert.are.same("MULT * nil 2", tk(), err())
+                assert.are.same("COMMENT --comment* nil 2", tk(), err())
+                assert.are.same("STRING 'string' string 3", tk(), err())
+                assert.are.same("STRING [[multi\nline]] multi\nline 3", tk(), err())
+                assert.are.same("SEMICOLON ; nil 4", tk(), err())
+                assert.are.same("<eof> nil nil 4", tk(), err())
             end)
         end)
     end)
@@ -68,6 +68,10 @@ describe("LuaScanner", function()
         it("returns <eof>", function()
             local scanner = LuaScanner.new("")
             assert.are.same("<eof> nil nil 1", scanner:scanToken():tostring())
+        end)
+        it("returns UNKNOWN", function()
+            local scanner = LuaScanner.new("@")
+            assert.are.same('UNKNOWN @ nil 1', scanner:scanToken():tostring())
         end)
         it("returns LEFT_PAREN", function()
             local scanner = LuaScanner.new("(")
