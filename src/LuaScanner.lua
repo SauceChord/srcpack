@@ -53,6 +53,8 @@ function LuaScanner:scanToken()
         ['+'] = function() return self:addToken("PLUS") end,
         [';'] = function() return self:addToken("SEMICOLON") end,
         ['*'] = function() return self:addToken("STAR") end,
+        ['%'] = function() return self:addToken("MOD") end,
+        ['^'] = function() return self:addToken("POW") end,
         ['/'] = function() return self:addToken(self:matchAny('/') and "SLASH_SLASH" or "SLASH") end,
         ['~'] = function() return self:addToken(self:matchAny('=') and "TILDE_EQUAL" or "TILDE") end,
         ['<'] = function() return self:addToken(self:matchAny('=') and "LESS_EQUAL" or "LESS") end,
