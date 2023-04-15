@@ -96,8 +96,31 @@ function LuaScanner:scanToken()
             end
         end,
         [']'] = function() return self:addToken("RIGHT_BRACKET") end,
+        -- Numerals
+        ['0'] = function() return self:buildNumeral() end,
+        ['1'] = function() return self:buildNumeral() end,
+        ['2'] = function() return self:buildNumeral() end,
+        ['3'] = function() return self:buildNumeral() end,
+        ['4'] = function() return self:buildNumeral() end,
+        ['5'] = function() return self:buildNumeral() end,
+        ['6'] = function() return self:buildNumeral() end,
+        ['7'] = function() return self:buildNumeral() end,
+        ['8'] = function() return self:buildNumeral() end,
+        ['9'] = function() return self:buildNumeral() end,
     }
     return (switch[c] or error(string.format("unhandled character %s in token stream at line %d", c, self.line)))()
+end
+
+function LuaScanner:buildNumeral()
+    while self:isDigit() do self:advance() end
+    local literal = self.source:sub(self.start, self.current - 1)
+    return self:addToken("INT", literal)
+end
+
+function LuaScanner:isDigit()
+    if self:isAtEnd() then return false end
+    local digit = 57 - self.source:byte(self.current, self.current)
+    return digit >= 0 and digit <= 9
 end
 
 function LuaScanner:buildMultilineComment()
