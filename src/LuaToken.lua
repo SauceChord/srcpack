@@ -7,13 +7,13 @@ local LuaToken = { }
 
 ---@return string
 function LuaToken:tostring()
-    return string.format("%s %s %s", tostring(self.type), tostring(self.lexeme), tostring(self.literal))
+    return string.format("%s %s %s %d", tostring(self.type), tostring(self.lexeme), tostring(self.literal), self.line)
 end
 
 local mt = { __index = LuaToken, __tostring = LuaToken.tostring }
 
 ---@param type string
----@param lexeme string
+---@param lexeme string|nil
 ---@param literal any
 ---@param line integer
 ---@return LuaToken
