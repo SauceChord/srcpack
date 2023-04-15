@@ -28,7 +28,10 @@ function LuaScanner:scanToken()
         ['{'] = function() return self:addToken("LEFT_BRACE") end,
         ['}'] = function() return self:addToken("RIGHT_BRACE") end,
         [','] = function() return self:addToken("COMMA") end,
-        ['.'] = function() return self:addToken(self:matchAny('.') and (self:matchAny('.') and "DOTS" or "CONCAT") or "DOT") end,
+        ['.'] = function()
+            return self:addToken(self:matchAny('.') and (self:matchAny('.') and "DOTS" or "CONCAT") or
+                "DOT")
+        end,
         ['-'] = function()
             if self:matchAny('-') then
                 if self:matchMany('[[') then
@@ -89,8 +92,33 @@ function LuaScanner:scanToken()
             self:skipWhiteSpace()
             return self:scanToken()
         end,
+        ["'"] = function()
+            return self:buildStringToken("'")
+        end,
     }
     return (switch[c] or error(string.format("unhandled character %s in token stream at line %d", c, self.line)))()
+end
+
+function LuaScanner:buildStringToken(endChar)
+    while not self:isAtEnd() do
+        if self:peek() == '\\' then
+            self:advance()
+            self:advance()
+        elseif self:peek() == endChar then
+            break
+        else
+            if self:peek() == '\r' or self:peek() == '\n' then
+                self.line = self.line + 1
+            end
+            self:advance()
+        end
+    end
+    if self:isAtEnd() then
+        error(string.format("Unterminated string on line %d", self.line))
+    end
+    local value = self.source:sub(self.start + 1, self.current - 1)
+    self:advance()
+    return self:addToken("STRING", value)
 end
 
 function LuaScanner:skipWhiteSpace()
@@ -115,9 +143,10 @@ end
 ---@param literal string|nil
 ---@return LuaToken token
 function LuaScanner:addToken(type, literal)
-    local text = self.source:sub(self.start, self.current)
+    local text = self.source:sub(self.start, self.current - 1)
     local token = LuaToken.new(type, text, literal, self.line)
     table.insert(self.tokens, token)
+    self.start = self.current
     return token
 end
 
