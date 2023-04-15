@@ -32,6 +32,7 @@ function LuaScanner:scanToken()
         ['}'] = function() return self:addToken("RIGHT_BRACE") end,
         [','] = function() return self:addToken("COMMA") end,
         ['.'] = function()
+            if self:isDigit() then return self:buildNumeral() end
             return self:addToken(self:matchAny('.') and (self:matchAny('.') and "DOTS" or "CONCAT") or
                 "DOT")
         end,
@@ -82,10 +83,22 @@ function LuaScanner:scanToken()
             end
             return self:scanToken()
         end,
-        [' '] = function() self:skipWhiteSpace() return self:scanToken() end,
-        ['\t'] = function() self:skipWhiteSpace() return self:scanToken() end,
-        ['\f'] = function() self:skipWhiteSpace() return self:scanToken() end,
-        ['\v'] = function() self:skipWhiteSpace() return self:scanToken() end,
+        [' '] = function()
+            self:skipWhiteSpace()
+            return self:scanToken()
+        end,
+        ['\t'] = function()
+            self:skipWhiteSpace()
+            return self:scanToken()
+        end,
+        ['\f'] = function()
+            self:skipWhiteSpace()
+            return self:scanToken()
+        end,
+        ['\v'] = function()
+            self:skipWhiteSpace()
+            return self:scanToken()
+        end,
         ["'"] = function() return self:buildStringToken("'") end,
         ['"'] = function() return self:buildStringToken('"') end,
         ['['] = function()
@@ -112,11 +125,44 @@ function LuaScanner:scanToken()
 end
 
 function LuaScanner:buildNumeral()
-    while self:isDigit() do self:advance() end
-    local literal = self.source:sub(self.start, self.current - 1)
-    return self:addToken("INT", literal)
+    local expo = "eE"
+    if self:matchAny("xX") then
+        expo = "pP"
+        while not self:isAtEnd() do
+            if self:matchAny(expo) then
+                self:matchAny("-+")
+            elseif self:isHexadecimalDigit() or self:peek() == '.' then
+                self:advance()
+            else
+                break
+            end
+        end
+    else
+        while not self:isAtEnd() do
+            if self:matchAny(expo) then
+                self:matchAny("-+")
+            elseif self:matchAny(".") then
+            elseif self:isDigit() then
+                self:advance()
+            else
+                break
+            end
+        end
+    end
+    local literal = tonumber(self.source:sub(self.start, self.current - 1))
+    return self:addToken("REAL", literal)
 end
 
+---@return boolean isHexadecimalDigit
+function LuaScanner:isHexadecimalDigit()
+    if self:isAtEnd() then return false end
+    local byte = self.source:byte(self.current, self.current)
+    return (byte >= 48 and byte <= 57)  -- 0-9
+        or (byte >= 97 and byte <= 102) -- a-f
+        or (byte >= 65 and byte <= 70)  -- A-F
+end
+
+---@return boolean isDigit
 function LuaScanner:isDigit()
     if self:isAtEnd() then return false end
     local digit = 57 - self.source:byte(self.current, self.current)
