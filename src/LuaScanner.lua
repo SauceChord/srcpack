@@ -38,12 +38,7 @@ function LuaScanner:scanToken()
         ['-'] = function()
             if self:matchAny('-') then
                 if self:matchMany('[[') then
-                    while not self:isAtEnd() and not self:matchMany(']]') do self:advance() end
-                    local token = self:addToken("MULTILINE_COMMENT")
-                    local _, newLineCount = token.lexeme:gsub("[\r\n]", "")
-                    self.line = self.line + newLineCount
-                    token:trimCommentEndline()
-                    return token
+                    return self:buildMultilineComment()
                 else
                     while self:peek() ~= '\r' and self:peek() ~= '\n' and not self:isAtEnd() do
                         self:advance()
@@ -108,6 +103,15 @@ function LuaScanner:scanToken()
         end,
     }
     return (switch[c] or error(string.format("unhandled character %s in token stream at line %d", c, self.line)))()
+end
+
+function LuaScanner:buildMultilineComment()
+    while not self:isAtEnd() and not self:matchMany(']]') do self:advance() end
+    local token = self:addToken("MULTILINE_COMMENT")
+    local _, newLineCount = token.lexeme:gsub("[\r\n]", "")
+    self.line = self.line + newLineCount
+    token:trimCommentEndline()
+    return token
 end
 
 function LuaScanner:buildStringToken(endChars)
