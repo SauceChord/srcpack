@@ -6,52 +6,52 @@
 local LuaToken = {
     -- These fields exist for easier reactoring.
     -- Comments
-    Comment = "Comment",                       -- --
-    MultilineComment = "MultilineComment",     -- --[[]]
+    Comment = "Comment",                         -- --
+    MultilineComment = "MultilineComment",       -- --[[]]
     -- General
-    Terminator = "Terminator",                 -- ;
-    OpenScope = "OpenScope",                   -- {
-    CloseScope = "CloseScope",                 -- }
-    Label = "Label",                           -- ::
-    Concat = "Concat",                         -- ..
-    VarArgs = "VarArgs",                       -- ...
-    Assign = "Assign",                         -- =
+    Terminator = "Terminator",                   -- ;
+    OpenScope = "OpenScope",                     -- {
+    CloseScope = "CloseScope",                   -- }
+    Label = "Label",                             -- ::
+    Concat = "Concat",                           -- ..
+    VarArgs = "VarArgs",                         -- ...
+    Assign = "Assign",                           -- =
     -- Types
-    Number = "Number",                         -- 14, 0x3, 3.26e-4, 0x2p+2
-    String = "String",                         -- "", '', [[]]
+    Number = "Number",                           -- 14, 0x3, 3.26e-4, 0x2p+2
+    String = "String",                           -- "", '', [[]]
     --- Grouping
-    OpenBracket = "OpenBracket",               -- (
-    CloseBracket = "CloseBracket",             -- )
-    Comma = "Comma",                           -- ,
+    OpenBracket = "OpenBracket",                 -- (
+    CloseBracket = "CloseBracket",               -- )
+    Comma = "Comma",                             -- ,
     -- Indexing
-    OpenIndex = "OpenIndex",                   -- [
-    CloseIndex = "CloseIndex",                 -- ]
-    FieldSelector = "FieldSelector",           -- .
-    MethodCall = "MethodCall",                 -- :
+    OpenIndex = "OpenIndex",                     -- [
+    CloseIndex = "CloseIndex",                   -- ]
+    FieldSelector = "FieldSelector",             -- .
+    MethodCall = "MethodCall",                   -- :
     -- Binary
-    BinaryNot = "BinaryNot",                   -- ~
-    BinaryAnd = "BinaryAnd",                   -- &
-    BinaryOr = "BinaryOr",                     -- |
-    BinaryShl = "BinaryShl",                   -- <<
-    BinaryShr = "BinaryShr",                   -- >>
+    BinaryNot = "BinaryNot",                     -- ~
+    BinaryAnd = "BinaryAnd",                     -- &
+    BinaryOr = "BinaryOr",                       -- |
+    BinaryShl = "BinaryShl",                     -- <<
+    BinaryShr = "BinaryShr",                     -- >>
     -- Math
-    Minus = "Minus",                           -- -
-    Plus = "Plus",                             -- +
-    Multiply = "Multiply",                     -- *
-    Divide = "Divide",                         -- /
-    DivideFloor = "DivideFloor",               -- //
-    Modulus = "Modulus",                       -- %
-    Exponent = "Exponent",                     -- ^
+    Minus = "Minus",                             -- -
+    Plus = "Plus",                               -- +
+    Multiply = "Multiply",                       -- *
+    Divide = "Divide",                           -- /
+    DivideFloor = "DivideFloor",                 -- //
+    Modulus = "Modulus",                         -- %
+    Exponent = "Exponent",                       -- ^
     -- Logic
-    Equals = "Equals",                         -- ==
-    NotEquals = "NotEquals",                   -- ~=
-    LessThan = "LessThan",                     -- <
-    LessThanOrEuqal = "LessThanOrEuqal",       -- <=
-    GreaterThan = "GreaterThan",               -- >
-    GreaterThanOrEuqal = "GreaterThanOrEuqal", -- >=
+    Equals = "Equals",                           -- ==
+    NotEquals = "NotEquals",                     -- ~=
+    LessThan = "LessThan",                       -- <
+    LessThanOrEquals = "LessThanOrEquals",       -- <=
+    GreaterThan = "GreaterThan",                 -- >
+    GreaterThanOrEquals = "GreaterThanOrEquals", -- >=
     -- Misc
-    Error = "Error",                           -- Anything uncovered
-    EndOfStream = "EndOfStream",               -- Last Token
+    Error = "Error",                             -- Anything uncovered
+    EndOfStream = "EndOfStream",                 -- Last Token
 }
 
 ---@return string

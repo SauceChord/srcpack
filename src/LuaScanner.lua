@@ -18,23 +18,23 @@ function LuaScanner:scanTokens()
     while not self:isAtEnd() do
         self:scanToken()
     end
-    table.insert(self.tokens, LuaToken.new("<eof>", nil, nil, self.line))
+    table.insert(self.tokens, LuaToken.new(LuaToken.EndOfStream, nil, nil, self.line))
     return self.tokens
 end
 
 function LuaScanner:scanToken()
-    if self:isAtEnd() then return LuaToken.new("<eof>", nil, nil, self.line) end
+    if self:isAtEnd() then return LuaToken.new(LuaToken.EndOfStream, nil, nil, self.line) end
     local c = self:advance()
     local switch = {
-        ['('] = function() return self:addToken("LEFT_PAREN") end,
-        [')'] = function() return self:addToken("RIGHT_PAREN") end,
-        ['{'] = function() return self:addToken("LEFT_BRACE") end,
-        ['}'] = function() return self:addToken("RIGHT_BRACE") end,
-        [','] = function() return self:addToken("COMMA") end,
+        ['('] = function() return self:addToken(LuaToken.OpenBracket) end,
+        [')'] = function() return self:addToken(LuaToken.CloseBracket) end,
+        ['{'] = function() return self:addToken(LuaToken.OpenScope) end,
+        ['}'] = function() return self:addToken(LuaToken.CloseScope) end,
+        [','] = function() return self:addToken(LuaToken.Comma) end,
         ['.'] = function()
             if self:isDigit() then return self:buildNumeral() end
-            return self:addToken(self:matchAny('.') and (self:matchAny('.') and "DOTS" or "CONCAT") or
-                "DOT")
+            return self:addToken(self:matchAny('.') and (self:matchAny('.') and LuaToken.VarArgs or LuaToken.Concat) or
+            LuaToken.FieldSelector)
         end,
         ['-'] = function()
             if self:matchAny('-') then
@@ -44,27 +44,27 @@ function LuaScanner:scanToken()
                     while self:peek() ~= '\r' and self:peek() ~= '\n' and not self:isAtEnd() do
                         self:advance()
                     end
-                    local token = self:addToken("COMMENT")
+                    local token = self:addToken(LuaToken.Comment)
                     token:trimCommentEndline()
                     return token
                 end
             else
-                return self:addToken("MINUS")
+                return self:addToken(LuaToken.Minus)
             end
         end,
-        ['+'] = function() return self:addToken("PLUS") end,
-        [';'] = function() return self:addToken("SEMICOLON") end,
-        ['*'] = function() return self:addToken("MULT") end,
-        ['%'] = function() return self:addToken("MOD") end,
-        ['^'] = function() return self:addToken("POW") end,
-        ['&'] = function() return self:addToken("BAND") end,
-        ['|'] = function() return self:addToken("BOR") end,
-        ['/'] = function() return self:addToken(self:matchAny('/') and "IDIV" or "DIV") end,
-        ['~'] = function() return self:addToken(self:matchAny('=') and "NE" or "BNOT") end,
-        ['<'] = function() return self:addToken(self:matchAny('<') and "SHL" or (self:matchAny('=') and "LE" or "L")) end,
-        ['>'] = function() return self:addToken(self:matchAny('>') and "SHR" or (self:matchAny('=') and "GE" or "G")) end,
-        ['='] = function() return self:addToken(self:matchAny('=') and "EQ" or "ASSIGN") end,
-        [':'] = function() return self:addToken(self:matchAny(':') and "DBCOLON" or "COLON") end,
+        ['+'] = function() return self:addToken(LuaToken.Plus) end,
+        [';'] = function() return self:addToken(LuaToken.Terminator) end,
+        ['*'] = function() return self:addToken(LuaToken.Multiply) end,
+        ['%'] = function() return self:addToken(LuaToken.Modulus) end,
+        ['^'] = function() return self:addToken(LuaToken.Exponent) end,
+        ['&'] = function() return self:addToken(LuaToken.BinaryAnd) end,
+        ['|'] = function() return self:addToken(LuaToken.BinaryOr) end,
+        ['/'] = function() return self:addToken(self:matchAny('/') and LuaToken.DivideFloor or LuaToken.Divide) end,
+        ['~'] = function() return self:addToken(self:matchAny('=') and LuaToken.NotEquals or LuaToken.BinaryNot) end,
+        ['<'] = function() return self:addToken(self:matchAny('<') and LuaToken.BinaryShl or (self:matchAny('=') and LuaToken.LessThanOrEquals or LuaToken.LessThan)) end,
+        ['>'] = function() return self:addToken(self:matchAny('>') and LuaToken.BinaryShr or (self:matchAny('=') and LuaToken.GreaterThanOrEquals or LuaToken.GreaterThan)) end,
+        ['='] = function() return self:addToken(self:matchAny('=') and LuaToken.Equals or LuaToken.Assign) end,
+        [':'] = function() return self:addToken(self:matchAny(':') and LuaToken.Label or LuaToken.MethodCall) end,
         ['\r'] = function()
             self.line = self.line + 1
             self.start = self.current
@@ -105,10 +105,10 @@ function LuaScanner:scanToken()
             if self:matchAny('[') then
                 return self:buildStringToken(']]')
             else
-                return self:addToken("LEFT_BRACKET")
+                return self:addToken(LuaToken.OpenIndex)
             end
         end,
-        [']'] = function() return self:addToken("RIGHT_BRACKET") end,
+        [']'] = function() return self:addToken(LuaToken.CloseIndex) end,
         -- Numerals
         ['0'] = function() return self:buildNumeral() end,
         ['1'] = function() return self:buildNumeral() end,
@@ -121,15 +121,13 @@ function LuaScanner:scanToken()
         ['8'] = function() return self:buildNumeral() end,
         ['9'] = function() return self:buildNumeral() end,
     }
-    return (switch[c] or function() return self:addToken("UNKNOWN") end)()
+    return (switch[c] or function() return self:addToken(LuaToken.Error) end)()
 end
 
 function LuaScanner:buildNumeral()
-    local expo = "eE"
     if self:matchAny("xX") then
-        expo = "pP"
         while not self:isAtEnd() do
-            if self:matchAny(expo) then
+            if self:matchAny("pP") then
                 self:matchAny("-+")
             elseif self:isHexadecimalDigit() or self:peek() == '.' then
                 self:advance()
@@ -139,7 +137,7 @@ function LuaScanner:buildNumeral()
         end
     else
         while not self:isAtEnd() do
-            if self:matchAny(expo) then
+            if self:matchAny("eE") then
                 self:matchAny("-+")
             elseif self:matchAny(".") then
             elseif self:isDigit() then
@@ -150,28 +148,12 @@ function LuaScanner:buildNumeral()
         end
     end
     local literal = tonumber(self.source:sub(self.start, self.current - 1))
-    return self:addToken("REAL", literal)
-end
-
----@return boolean isHexadecimalDigit
-function LuaScanner:isHexadecimalDigit()
-    if self:isAtEnd() then return false end
-    local byte = self.source:byte(self.current, self.current)
-    return (byte >= 48 and byte <= 57)  -- 0-9
-        or (byte >= 97 and byte <= 102) -- a-f
-        or (byte >= 65 and byte <= 70)  -- A-F
-end
-
----@return boolean isDigit
-function LuaScanner:isDigit()
-    if self:isAtEnd() then return false end
-    local digit = 57 - self.source:byte(self.current, self.current)
-    return digit >= 0 and digit <= 9
+    return self:addToken(LuaToken.Number, literal)
 end
 
 function LuaScanner:buildMultilineComment()
     while not self:isAtEnd() and not self:matchMany(']]') do self:advance() end
-    local token = self:addToken("MULTILINE_COMMENT")
+    local token = self:addToken(LuaToken.MultilineComment)
     local _, newLineCount = token.lexeme:gsub("[\r\n]", "")
     self.line = self.line + newLineCount
     token:trimCommentEndline()
@@ -199,8 +181,24 @@ function LuaScanner:buildStringToken(endChars)
         error(string.format("Unterminated string on line %d", line))
     end
     local value = self.source:sub(self.start + #endChars, self.current - #endChars - 1)
-    local token = self:addToken("STRING", value, line)
+    local token = self:addToken(LuaToken.String, value, line)
     return token
+end
+
+---@return boolean isHexadecimalDigit
+function LuaScanner:isHexadecimalDigit()
+    if self:isAtEnd() then return false end
+    local byte = self.source:byte(self.current, self.current)
+    return (byte >= 48 and byte <= 57)  -- 0-9
+        or (byte >= 97 and byte <= 102) -- a-f
+        or (byte >= 65 and byte <= 70)  -- A-F
+end
+
+---@return boolean isDigit
+function LuaScanner:isDigit()
+    if self:isAtEnd() then return false end
+    local digit = self.source:byte(self.current, self.current)
+    return digit >= 48 and digit <= 57 -- 0-9
 end
 
 function LuaScanner:skipWhiteSpace()
