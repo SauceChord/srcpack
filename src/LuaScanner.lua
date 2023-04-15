@@ -67,11 +67,19 @@ function LuaScanner:scanToken()
         ['\r'] = function()
             self.line = self.line + 1
             self.start = self.current
+            while self:matchAny("\r\n") do
+                self.line = self.line + 1
+                self.start = self.current
+            end
             return self:scanToken()
         end,
         ['\n'] = function()
             self.line = self.line + 1
             self.start = self.current
+            while self:matchAny("\r\n") do
+                self.line = self.line + 1
+                self.start = self.current
+            end
             return self:scanToken()
         end,
         [' '] = function()
@@ -132,11 +140,10 @@ function LuaScanner:buildStringToken(endChars)
         end
     end
     if not reachedEnd then
-        error(string.format("Unterminated string on line %d", self.line))
+        error(string.format("Unterminated string on line %d", line))
     end
     local value = self.source:sub(self.start + #endChars, self.current - #endChars - 1)
     local token = self:addToken("STRING", value, line)
-    --self:advance()
     return token
 end
 
