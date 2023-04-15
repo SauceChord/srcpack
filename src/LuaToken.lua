@@ -18,7 +18,7 @@ local LuaToken = {
     Assign = "Assign",                         -- =
     -- Types
     Number = "Number",                         -- 14, 0x3, 3.26e-4, 0x2p+2
-    String = "String",                         -- "", '', [[]]    
+    String = "String",                         -- "", '', [[]]
     --- Grouping
     OpenBracket = "OpenBracket",               -- (
     CloseBracket = "CloseBracket",             -- )
@@ -50,7 +50,8 @@ local LuaToken = {
     GreaterThan = "GreaterThan",               -- >
     GreaterThanOrEuqal = "GreaterThanOrEuqal", -- >=
     -- Misc
-    Error = "Error", -- Anything uncovered
+    Error = "Error",                           -- Anything uncovered
+    EndOfStream = "EndOfStream",               -- Last Token
 }
 
 ---@return string
