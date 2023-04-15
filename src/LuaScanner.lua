@@ -28,7 +28,7 @@ function LuaScanner:scanToken()
         ['{'] = function() return self:addToken("LEFT_BRACE") end,
         ['}'] = function() return self:addToken("RIGHT_BRACE") end,
         [','] = function() return self:addToken("COMMA") end,
-        ['.'] = function() return self:addToken("DOT") end,
+        ['.'] = function() return self:addToken(self:matchAny('.') and (self:matchAny('.') and "DOTS" or "CONCAT") or "DOT") end,
         ['-'] = function()
             if self:matchAny('-') then
                 if self:matchMany('[[') then
