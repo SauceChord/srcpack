@@ -1,29 +1,18 @@
 local FibonacciIntegerEncoder = {}
 
 FibonacciIntegerEncoder.__index = FibonacciIntegerEncoder
+---@alias WriteBits fun(integer, integer)
 
-function FibonacciIntegerEncoder.New(args)
+---Creates a new FibonacciIntegerEncoderInstance
+---@param writeBits WriteBits Function that takes care of writing bits
+---@return FibonacciIntegerEncoderInstance instance
+function FibonacciIntegerEncoder.New(writeBits)
+    ---@class FibonacciIntegerEncoderInstance
     local s = {}
-
-    -- Public field
-    s.Field = nil
-
-    -- Private attribute
-    local attribute = nil
-
-    -- Meta function
-    function s:__add(o1, o2)
+    function s.Encode(n)
+        writeBits(n, n)
     end
-
-    -- Private function
-    local function privateFunction()
-    end
-
-    -- Public function
-    function s.PublicFunction()
-    end
-
-    return setmetatable(s, FibonacciIntegerEncoder)
+    return s
 end
 
 -- Static function
