@@ -22,6 +22,27 @@ function LuaScanner:scanTokens()
     return self.tokens
 end
 
+---Returns true if c is [a-zA-Z_]
+---@param c string Single character
+---@return boolean isAlpha
+local function IsAlpha(c)
+    local b = c:byte(1, 1)
+    return (b >= 97 and b <= 122) -- a-z
+        or (b >= 65 and b <= 90)  -- A-Z
+        or (b == 95)              -- _
+end
+
+---Returns true if c is [a-zA-Z0-9_]
+---@param c string Single character
+---@return boolean isAlphaNumeric
+local function IsAlphaNumeric(c)
+    local b = c:byte(1, 1)
+    return (b >= 97 and b <= 122) -- a-z
+        or (b >= 65 and b <= 90)  -- A-Z
+        or (b >= 48 and b <= 57)  -- 0-9
+        or (b == 95)              -- _
+end
+
 function LuaScanner:scanToken()
     if self:isAtEnd() then return LuaToken.new(LuaToken.EndOfStream, nil, nil, self.line) end
     local c = self:advance()
@@ -34,7 +55,7 @@ function LuaScanner:scanToken()
         ['.'] = function()
             if self:isDigit() then return self:buildNumeral() end
             return self:addToken(self:matchAny('.') and (self:matchAny('.') and LuaToken.VarArgs or LuaToken.Concat) or
-            LuaToken.FieldSelector)
+                LuaToken.FieldSelector)
         end,
         ['-'] = function()
             if self:matchAny('-') then
@@ -60,8 +81,14 @@ function LuaScanner:scanToken()
         ['|'] = function() return self:addToken(LuaToken.BinaryOr) end,
         ['/'] = function() return self:addToken(self:matchAny('/') and LuaToken.DivideFloor or LuaToken.Divide) end,
         ['~'] = function() return self:addToken(self:matchAny('=') and LuaToken.NotEquals or LuaToken.BinaryNot) end,
-        ['<'] = function() return self:addToken(self:matchAny('<') and LuaToken.BinaryShl or (self:matchAny('=') and LuaToken.LessThanOrEquals or LuaToken.LessThan)) end,
-        ['>'] = function() return self:addToken(self:matchAny('>') and LuaToken.BinaryShr or (self:matchAny('=') and LuaToken.GreaterThanOrEquals or LuaToken.GreaterThan)) end,
+        ['<'] = function()
+            return self:addToken(self:matchAny('<') and LuaToken.BinaryShl or
+                (self:matchAny('=') and LuaToken.LessThanOrEquals or LuaToken.LessThan))
+        end,
+        ['>'] = function()
+            return self:addToken(self:matchAny('>') and LuaToken.BinaryShr or
+                (self:matchAny('=') and LuaToken.GreaterThanOrEquals or LuaToken.GreaterThan))
+        end,
         ['='] = function() return self:addToken(self:matchAny('=') and LuaToken.Equals or LuaToken.Assign) end,
         [':'] = function() return self:addToken(self:matchAny(':') and LuaToken.Label or LuaToken.MethodCall) end,
         ['\r'] = function()
@@ -120,7 +147,20 @@ function LuaScanner:scanToken()
         ['8'] = function() return self:buildNumeral() end,
         ['9'] = function() return self:buildNumeral() end,
     }
-    return (switch[c] or function() return self:addToken(LuaToken.Error) end)()
+    return (switch[c] or function()
+        if IsAlpha(c) then
+            return self:buildIdentifier()
+        else
+            return self:addToken(LuaToken.Error)
+        end
+    end)()
+end
+
+function LuaScanner:buildIdentifier()
+    while not self:isAtEnd() and IsAlphaNumeric(self:peek()) do self:advance() end
+    local text = self.source:sub(self.start, self.current)
+    local type = LuaToken.Keywords[text] or LuaToken.Identifier
+    return self:addToken(type)
 end
 
 function LuaScanner:buildNumeral()

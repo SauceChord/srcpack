@@ -9,6 +9,7 @@ local LuaToken = {
     Comment = "Comment",                         -- --
     MultilineComment = "MultilineComment",       -- --[[]]
     -- General
+    Identifier = "Identifier",                   -- Users identifier, like "i" or "doSomething" (variable and function names etc)
     Terminator = "Terminator",                   -- ;
     OpenScope = "OpenScope",                     -- {
     CloseScope = "CloseScope",                   -- }
@@ -49,9 +50,58 @@ local LuaToken = {
     LessThanOrEquals = "LessThanOrEquals",       -- <=
     GreaterThan = "GreaterThan",                 -- >
     GreaterThanOrEquals = "GreaterThanOrEquals", -- >=
+    -- 22 Keywords
+    Keywords = nil,                              -- Assigned below
+    And = "And",                                 -- and
+    Break = "Break",                             -- break
+    Do = "Do",                                   -- do
+    Else = "Else",                               -- else
+    ElseIf = "ElseIf",                           -- elseif
+    End = "End",                                 -- end
+    False = "False",                             -- false
+    For = "For",                                 -- for
+    Function = "Function",                       -- function
+    Goto = "Goto",                               -- goto
+    If = "If",                                   -- if
+    In = "In",                                   -- in
+    Local = "Local",                             -- local
+    Nil = "Nil",                                 -- nil
+    Not = "Not",                                 -- not
+    Or = "Or",                                   -- or
+    Repeat = "Repeat",                           -- repeat
+    Return = "Return",                           -- return
+    Then = "Then",                               -- then
+    True = "True",                               -- true
+    Until = "Until",                             -- until
+    While = "While",                             -- while
     -- Misc
     Error = "Error",                             -- Anything uncovered
     EndOfStream = "EndOfStream",                 -- Last Token
+}
+
+LuaToken.Keywords = {
+    ["and"] = "And",
+    ["break"] = "Break",
+    ["do"] = "Do",
+    ["else"] = "Else",
+    ["elseif"] = "ElseIf",
+    ["end"] = "End",
+    ["false"] = "False",
+    ["for"] = "For",
+    ["function"] = "Function",
+    ["goto"] = "Goto",
+    ["if"] = "If",
+    ["in"] = "In",
+    ["local"] = "Local",
+    ["nil"] = "Nil",
+    ["not"] = "Not",
+    ["or"] = "Or",
+    ["repeat"] = "Repeat",
+    ["return"] = "Return",
+    ["then"] = "Then",
+    ["true"] = "True",
+    ["until"] = "Until",
+    ["while"] = "While",
 }
 
 ---@return string
