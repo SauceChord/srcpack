@@ -230,7 +230,7 @@ function LuaScanner:advance()
 end
 
 ---@param type string
----@param literal string|nil
+---@param literal any
 ---@param line integer|nil
 ---@return LuaToken token
 function LuaScanner:addToken(type, literal, line)
