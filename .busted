@@ -2,6 +2,7 @@ return {
     _all = {
         ROOT = {
             "src",
+            "src/packing/codecs",
             "test_samples",
             },
         coverage = false,
