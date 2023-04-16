@@ -164,11 +164,11 @@ function LuaScanner:buildIdentifier()
 end
 
 function LuaScanner:buildNumeral()
-    if self:matchAny("xX") then
+    if self:matchAny("xX") then                                         -- hexadecimal
         while not self:isAtEnd() do
-            if self:matchAny("pP") then
-                self:matchAny("-+")
-            elseif self:isHexadecimalDigit() or self:peek() == '.' then
+            if self:matchAny("pP") then                                 -- exponent
+                self:matchAny("-+")                                     -- exponent sign
+            elseif self:isHexadecimalDigit() or self:peek() == '.' then -- this matches multiple '.' but lua does it too, so
                 self:advance()
             else
                 break
@@ -186,7 +186,14 @@ function LuaScanner:buildNumeral()
             end
         end
     end
+    if not self:isAtEnd() and IsAlpha(self:peek()) then -- malformed number
+        while not self:isAtEnd() and IsAlpha(self:peek()) do self:advance() end
+        return self:addToken(LuaToken.Error)
+    end
     local literal = tonumber(self.source:sub(self.start, self.current - 1))
+    if not literal then -- malformed number (like 0.0.0)
+        return self:addToken(LuaToken.Error)
+    end
     return self:addToken(LuaToken.Number, literal)
 end
 
