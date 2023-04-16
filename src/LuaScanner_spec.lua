@@ -21,7 +21,8 @@ end
 ---@param expectedLiteral any The expected literal value of Numbers or Strings
 ---@param expectedLine integer The expected line this token should appear on
 local function expects_output(expectedType, expectedLexeme, expectedLiteral, expectedLine)
-    assert.is_true(TokenIndex <= #Scanner.tokens, string.format("Too few tokens produced for expected output at index %d", TokenIndex))
+    assert.is_true(TokenIndex <= #Scanner.tokens,
+        string.format("Too few tokens produced for expected output at index %d", TokenIndex))
     local token = Scanner.tokens[TokenIndex]
     assert.are_same(expectedType, token.type, string.format("Scanner.tokens[%d].type", TokenIndex))
     assert.are_same(expectedLexeme, token.lexeme, string.format("Scanner.tokens[%d].lexeme", TokenIndex))
@@ -30,6 +31,9 @@ local function expects_output(expectedType, expectedLexeme, expectedLiteral, exp
     TokenIndex = TokenIndex + 1
 end
 
+-- Note that many of the tests doesn't use valid Lua source code
+-- It is the parsers job to deal with syntax checking, not the scanners
+-- So reader be warned for some confusing source tokenizing
 describe("LuaScanner", function()
     describe("new(source)", function()
         it("sets fields", function()
