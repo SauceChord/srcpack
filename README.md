@@ -24,10 +24,9 @@ As of current writing I have been unable to install busted without the use of [s
   - If this fails, proceed with the steps in **Installing x86_64-w64-mingw32-gcc** before continuing. The next step requires mingw32.
 - Run `luarocks install busted`
 
-### Installing x86_64-w64-mingw32-gcc
+### Installing x86_64-w64-mingw32-gcc via Cygwin
 
   - Install [Cygwin](http://cygwin.com/install.html) with `mingw64-x86_64-gcc-core` package.
-    - Or if you dont want Cygwin, figure out how to install `x86_64-w64-mingw32-gcc` elsewhere
   - Add Cygwins `bin` folder to PATH (eg. `C:/cygwin64/bin`)
   - Restart Powershell
   - Run `x86_64-w64-mingw32-gcc --version` from `C:/`
