@@ -45,7 +45,6 @@ function LuaScanner:scanToken()
                         self:advance()
                     end
                     local token = self:addToken(LuaToken.Comment)
-                    token:trimCommentEndline()
                     return token
                 end
             else
@@ -156,7 +155,6 @@ function LuaScanner:buildMultilineComment()
     local token = self:addToken(LuaToken.MultilineComment)
     local _, newLineCount = token.lexeme:gsub("[\r\n]", "")
     self.line = self.line + newLineCount
-    token:trimCommentEndline()
     return token
 end
 

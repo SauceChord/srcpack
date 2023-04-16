@@ -59,12 +59,6 @@ function LuaToken:tostring()
     return string.format("%s %s %s %d", tostring(self.type), tostring(self.lexeme), tostring(self.literal), self.line)
 end
 
-function LuaToken:trimCommentEndline()
-    if self.lexeme:sub(-1) == '\r' or self.lexeme:sub(-1) == '\n' then
-        self.lexeme = self.lexeme:sub(1, -2)
-    end
-end
-
 local mt = { __index = LuaToken, __tostring = LuaToken.tostring }
 
 ---@param type string
