@@ -4,7 +4,10 @@
 
 - Open a Terminal
 - Run `busted` 
-- If `busted` cannot be found you have to install it (see below). 
+- If `busted` cannot be found you have to install it (see below)
+- If `busted` show garbage characters
+  - Run `chcp 65001` to change code page to Utf-8
+  - Run `busted` 
 
 As of current writing I have been unable to install busted without the use of [scoop.sh](https://scoop.sh/)
 
