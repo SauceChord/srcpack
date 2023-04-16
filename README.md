@@ -1,9 +1,10 @@
 # srcpack
 
-## Running tests with busted (on Windows)
+## Running tests with [busted](https://lunarmodules.github.io/busted/) (on Windows)
 
-Open terminal and run `busted`. 
-If `busted` cannot be found you have to install it. 
+- Open a Terminal
+- Run `busted` 
+- If `busted` cannot be found you have to install it (see below). 
 
 As of current writing I have been unable to install busted without the use of [scoop.sh](https://scoop.sh/)
 
