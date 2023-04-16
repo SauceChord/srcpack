@@ -158,7 +158,7 @@ end
 
 function LuaScanner:buildIdentifier()
     while not self:isAtEnd() and IsAlphaNumeric(self:peek()) do self:advance() end
-    local text = self.source:sub(self.start, self.current)
+    local text = self.source:sub(self.start, self.current - 1)
     local type = LuaToken.Keywords[text] or LuaToken.Identifier
     return self:addToken(type)
 end

@@ -2,6 +2,7 @@ return {
     _all = {
         ROOT = {
             "src",
+            "test_samples",
             },
         coverage = false,
         verbose = false,
